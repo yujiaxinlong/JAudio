@@ -150,6 +150,16 @@ public class AggregatorContainer {
 		for (int i = 0; i < aggregatorList.size(); ++i) {
 			aggregatorList.get(i).outputARFFHeaderEntries(output);
 		}
+		
+		output.writeBytes("@DATA"+System.getProperty("line.separator"));
+	}
+	public void outputARFFHeaderEntriesWithFileName(DataOutputStream output) throws Exception {
+		for (int i = 0; i < aggregatorList.size(); ++i) {
+			aggregatorList.get(i).outputARFFHeaderEntries(output);
+		}
+		output.writeBytes("@ATTRIBUTE \"" + "FileName"
+				+ "\" STRING");
+		output.writeBytes(System.getProperty("line.separator"));
 		output.writeBytes("@DATA"+System.getProperty("line.separator"));
 	}
 

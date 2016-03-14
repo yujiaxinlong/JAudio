@@ -255,7 +255,7 @@ public class FeatureProcessor {
 		if (outputType == 0) {
 			writeValuesXMLHeader();
 		} else if (outputType == 1) {
-			writeValuesARFFHeader();
+			//writeValuesARFFHeader();
 		}
 	}
 
@@ -277,84 +277,89 @@ public class FeatureProcessor {
 		// Pre-process the recording and extract the samples from the audio
 		this.updater = updater;
 		double[] samples = preProcessRecording(recording_file);
+
+		double[][] separatedSamples = chunkArray(samples,(int)sampling_rate*10);
 		if(cancel.isCancel()){
 			throw new ExplicitCancel("Killed after loading data");
 		}
 		// Calculate the window start indices
-		LinkedList<Integer> window_start_indices_list = new LinkedList<Integer>();
-		int this_start = 0;
-		while (this_start < samples.length) {
-			window_start_indices_list.add(new Integer(this_start));
-			this_start += window_size - window_overlap_offset;
-		}
-		Integer[] window_start_indices_I = window_start_indices_list
-				.toArray(new Integer[1]);
-		int[] window_start_indices = new int[window_start_indices_I.length];
-
-		// if were using a progress bar, set its max update
-		if (updater != null) {
-			updater.setFileLength(window_start_indices.length);
-		}
-
-		for (int i = 0; i < window_start_indices.length; i++)
-			window_start_indices[i] = window_start_indices_I[i].intValue();
-
-		// Extract the feature values from the samples
-		double[][][] window_feature_values = getFeatures(samples,
-				window_start_indices);
-
-		// Find the feature averages and standard deviations if appropriate
-//		AggregatorContainer aggContainer = new AggregatorContainer();
-		// FeatureDefinition[][] overall_feature_definitions = new
-		// FeatureDefinition[1][];
-		// overall_feature_definitions[0] = null;
-		// double[][] overall_feature_values = null;
-		if (save_overall_recording_features) {
-//			Aggregator[] aggList = new Aggregator[10];
-//			aggList[0] = new Mean();
-//			aggList[1] = new StandardDeviation();
-//			aggList[2] = new AreaMoments();
-//			aggList[2].setParameters(new String[]{"MFCC"},new String[]{});
-//			aggList[3] = new AreaMoments();
-//			aggList[3].setParameters(new String[]{"LPC"},new String[]{});
-//			aggList[4] = new AreaMoments();
-//			aggList[4].setParameters(new String[]{"Derivative of MFCC"},new String[]{});
-//			aggList[5] = new AreaMoments();
-//			aggList[5].setParameters(new String[]{"Derivative of LPC"},new String[]{});
-//			aggList[6] = new AreaMoments();
-//			aggList[6].setParameters(new String[]{"Derivative of Method of Moments"},new String[]{});
-//			aggList[7] = new AreaMoments();
-//			aggList[7].setParameters(new String[]{"Method of Moments"},new String[]{});
-//			aggList[8] = new AreaMoments();
-//			aggList[8].setParameters(new String[]{"Area Method of Moments"},new String[]{});
-//			aggList[9] = new AreaMoments();
-//			aggList[9].setParameters(new String[]{"Derivative of Area Method of Moments"},new String[]{});
-//			aggList[2] = new MFCC();
-//			aggList[2] = new MultipleFeatureHistogram(new FeatureExtractor[]{new RMS(),new ZeroCrossings()},8);
-//			aggList[3] = new MultipleFeatureHistogram(new FeatureExtractor[]{new MFCC()},4);
-			
-//			aggContainer.add(aggList);
-			aggregator.add(feature_extractors, features_to_save);
-			aggregator.aggregate(window_feature_values);
-		}
-		// overall_feature_values = getOverallRecordingFeatures(
-		// window_feature_values, overall_feature_definitions);
-
-		// Save the feature values for this recording
-		if (outputType == 0) {
-			saveACEFeatureVectorsForARecording(window_feature_values,
-					window_start_indices, recording_file.getPath(),
-					aggregator);
-		} else if (outputType == 1) {
-			saveARFFFeatureVectorsForARecording(window_feature_values,
-					window_start_indices, recording_file.getPath(),
-					aggregator);
-		}
-
-		// Save the feature definitions
-		if (!definitions_written && (outputType == 0)) {
-			saveFeatureDefinitions(window_feature_values, aggregator);
-		}
+//		for(int x = 0; x < separatedSamples.length;x++){
+//			samples = separatedSamples[x];
+			LinkedList<Integer> window_start_indices_list = new LinkedList<Integer>();
+			int this_start = 0;
+			while (this_start < samples.length) {
+				window_start_indices_list.add(new Integer(this_start));
+				this_start += window_size - window_overlap_offset;
+			}
+			Integer[] window_start_indices_I = window_start_indices_list
+					.toArray(new Integer[1]);
+			int[] window_start_indices = new int[window_start_indices_I.length];
+	
+			// if were using a progress bar, set its max update
+			if (updater != null) {
+				updater.setFileLength(window_start_indices.length);
+			}
+	
+			for (int i = 0; i < window_start_indices.length; i++)
+				window_start_indices[i] = window_start_indices_I[i].intValue();
+	
+			// Extract the feature values from the samples
+			double[][][] window_feature_values = getFeatures(samples,
+					window_start_indices);
+	
+			// Find the feature averages and standard deviations if appropriate
+	//		AggregatorContainer aggContainer = new AggregatorContainer();
+			// FeatureDefinition[][] overall_feature_definitions = new
+			// FeatureDefinition[1][];
+			// overall_feature_definitions[0] = null;
+			// double[][] overall_feature_values = null;
+			if (save_overall_recording_features) {
+	//			Aggregator[] aggList = new Aggregator[10];
+	//			aggList[0] = new Mean();
+	//			aggList[1] = new StandardDeviation();
+	//			aggList[2] = new AreaMoments();
+	//			aggList[2].setParameters(new String[]{"MFCC"},new String[]{});
+	//			aggList[3] = new AreaMoments();
+	//			aggList[3].setParameters(new String[]{"LPC"},new String[]{});
+	//			aggList[4] = new AreaMoments();
+	//			aggList[4].setParameters(new String[]{"Derivative of MFCC"},new String[]{});
+	//			aggList[5] = new AreaMoments();
+	//			aggList[5].setParameters(new String[]{"Derivative of LPC"},new String[]{});
+	//			aggList[6] = new AreaMoments();
+	//			aggList[6].setParameters(new String[]{"Derivative of Method of Moments"},new String[]{});
+	//			aggList[7] = new AreaMoments();
+	//			aggList[7].setParameters(new String[]{"Method of Moments"},new String[]{});
+	//			aggList[8] = new AreaMoments();
+	//			aggList[8].setParameters(new String[]{"Area Method of Moments"},new String[]{});
+	//			aggList[9] = new AreaMoments();
+	//			aggList[9].setParameters(new String[]{"Derivative of Area Method of Moments"},new String[]{});
+	//			aggList[2] = new MFCC();
+	//			aggList[2] = new MultipleFeatureHistogram(new FeatureExtractor[]{new RMS(),new ZeroCrossings()},8);
+	//			aggList[3] = new MultipleFeatureHistogram(new FeatureExtractor[]{new MFCC()},4);
+				
+	//			aggContainer.add(aggList);
+				aggregator.add(feature_extractors, features_to_save);
+				aggregator.aggregate(window_feature_values);
+			}
+			// overall_feature_values = getOverallRecordingFeatures(
+			// window_feature_values, overall_feature_definitions);
+	
+			// Save the feature values for this recording
+			if (outputType == 0) {
+				saveACEFeatureVectorsForARecording(window_feature_values,
+						window_start_indices, recording_file.getPath(),
+						aggregator);
+			} else if (outputType == 1) {
+				saveARFFFeatureVectorsForARecording(window_feature_values,
+						window_start_indices, recording_file.getPath(),
+						aggregator);
+			}
+	
+			// Save the feature definitions
+			if (!definitions_written && (outputType == 0)) {
+				saveFeatureDefinitions(window_feature_values, aggregator);
+			}
+//		}
 	}
 
 	/**
@@ -848,6 +853,10 @@ public class FeatureProcessor {
 	 * @throws Exception
 	 */
 	private void writeValuesARFFHeader() throws Exception {
+		writeValuesARFFHeader(null);
+
+	}
+	public void writeValuesARFFHeader(String[] fileNames) throws Exception {
 		String sep = System.getProperty("line.separator");
 		String feature_value_header = "@relation jAudio" + sep;
 		values_writer.writeBytes(feature_value_header);
@@ -863,10 +872,17 @@ public class FeatureProcessor {
 					}
 				}
 			}
+			if(fileNames == null)
+				values_writer.writeBytes("@ATTRIBUTE \"" + "FileName"
+					+ "\" STRING");
+			else
+				values_writer.writeBytes("@ATTRIBUTE \"" + "FileName"
+						+ "\" {" +String.join(",", fileNames)+"}");
 			values_writer.writeBytes(sep);
 			values_writer.writeBytes("@DATA" + sep);
 		}
 	}
+
 
 	/**
 	 * Writes the given feature values extracted from a recording to the
@@ -907,7 +923,7 @@ public class FeatureProcessor {
 		// Either output overall features or output all features
 		if (save_overall_recording_features) {
 			if (!isARFFOverallHeaderWritten) {
-				aggContainer.outputARFFHeaderEntries(values_writer);
+				aggContainer.outputARFFHeaderEntriesWithFileName(values_writer);
 				isARFFOverallHeaderWritten = true;
 			}
 			aggContainer.outputARFFValueEntries(values_writer);
@@ -940,6 +956,9 @@ public class FeatureProcessor {
 						}
 					}
 				}
+				values_writer.writeBytes(",");
+				String[] separated = identifier.split("/");
+				values_writer.writeBytes(separated[separated.length-1]);
 				values_writer.writeBytes(System.getProperty("line.separator"));
 			}
 		}
@@ -1118,4 +1137,20 @@ public class FeatureProcessor {
 
 		definitions_written = true;
 	}
+	
+    public static double[][] chunkArray(double[] array, int chunkSize) {
+        int numOfChunks = (int)Math.ceil((double)array.length / chunkSize);
+        double[][] output = new double[numOfChunks][];
+
+        for(int i = 0; i < numOfChunks; ++i) {
+            int start = i * chunkSize;
+            int length = Math.min(array.length - start, chunkSize);
+
+            double[] temp = new double[length];
+            System.arraycopy(array, start, temp, 0, length);
+            output[i] = temp;
+        }
+
+        return output;
+    }
 }

@@ -558,7 +558,6 @@ public class AudioMethods
 		int number_of_bytes = audio_bytes.length;
 		int bytes_per_sample = bit_depth / 8;
 		int number_samples = number_of_bytes / bytes_per_sample / number_of_channels;
-
 		// Throw exception if incorrect number of bytes given
 		if ( ((number_samples == 2 || bytes_per_sample == 2) && (number_of_bytes % 2 != 0)) ||
 		     ((number_samples == 2 && bytes_per_sample == 2) && (number_of_bytes % 4 != 0)) )

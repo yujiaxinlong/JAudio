@@ -286,10 +286,15 @@ public class DataModel {
 		// exception
 		// if there are none
 		RecordingInfo[] recordings = info;
+		
 		if (recordings == null)
 			throw new Exception(
 					"No recordings available to extract features from.");
-
+		String[] names = new String[recordings.length];
+		for(int i = 0; i< recordings.length;i++){
+			String[] separatedPath = recordings[i].file_path.split("/");
+			names[i] = separatedPath[separatedPath.length-1];
+		}
 		if (updater != null) {
 			updater.setNumberOfFiles(recordings.length);
 		}
@@ -310,7 +315,8 @@ public class DataModel {
 				this.defaults, save_features_for_each_window,
 				save_overall_recording_features, featureValue, featureKey,
 				outputType, cancel_, container);
-
+		System.out.println(names[0]);
+		processor.writeValuesARFFHeader(names);
 		// Extract features from recordings one by one and save them in XML
 		// files
 //		AudioSamples recording_content;
