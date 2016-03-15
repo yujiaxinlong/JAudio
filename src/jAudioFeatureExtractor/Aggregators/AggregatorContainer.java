@@ -153,12 +153,12 @@ public class AggregatorContainer {
 		
 		output.writeBytes("@DATA"+System.getProperty("line.separator"));
 	}
-	public void outputARFFHeaderEntriesWithFileName(DataOutputStream output) throws Exception {
+	public void outputARFFHeaderEntriesWithFileName(DataOutputStream output,String[] names) throws Exception {
 		for (int i = 0; i < aggregatorList.size(); ++i) {
 			aggregatorList.get(i).outputARFFHeaderEntries(output);
 		}
 		output.writeBytes("@ATTRIBUTE \"" + "FileName"
-				+ "\" STRING");
+				+ "\" {" +String.join(",", names)+"}");
 		output.writeBytes(System.getProperty("line.separator"));
 		output.writeBytes("@DATA"+System.getProperty("line.separator"));
 	}
@@ -169,12 +169,20 @@ public class AggregatorContainer {
 	 * @param output data stream to place the Weka data in.
 	 * @throws Exception IO error occurs.
 	 */
-	public void outputARFFValueEntries(DataOutputStream output) throws Exception {
+	public void outputARFFValueEntries(DataOutputStream output,String name,boolean classify) throws Exception {
 		for (int i = 0; i < aggregatorList.size(); ++i) {
 			aggregatorList.get(i).outputARFFValueEntries(output);
 			if(i< aggregatorList.size()-1){
 				output.writeBytes(",");
 			}
+		}
+		output.writeBytes(",");
+		if(classify == true){
+			
+			output.writeBytes(name);
+		}
+		else{
+			output.writeBytes(name.replaceAll("[0-9]",""));
 		}
 		output.writeBytes(Aggregator.LINE_SEP);
 	}

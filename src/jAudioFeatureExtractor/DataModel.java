@@ -275,6 +275,14 @@ public class DataModel {
 			double samplingRate, boolean normalise, boolean perWindowStats,
 			boolean overallStats, RecordingInfo[] info, int arff)
 			throws Exception {
+			extract(windowSize,windowOverlap,
+					samplingRate, normalise, perWindowStats,
+					overallStats, info, arff,true,null);
+	}
+	public void extract(int windowSize, double windowOverlap,
+			double samplingRate, boolean normalise, boolean perWindowStats,
+			boolean overallStats, RecordingInfo[] info, int arff,boolean classify, String[] possibleValues)
+			throws Exception {
 		// Get the control parameters
 		boolean save_features_for_each_window = perWindowStats;
 		boolean save_overall_recording_features = overallStats;
@@ -308,15 +316,24 @@ public class DataModel {
 			aggregators[2].setParameters(new String[]{"Area Method of Moments of MFCCs"},new String[]{""});
 		}
 		container.add(aggregators);
-
+		
 		// Prepare to extract features
-		FeatureProcessor processor = new FeatureProcessor(window_size,
+		FeatureProcessor processor;
+		if(classify == true){
+			 processor = new FeatureProcessor(window_size,
 				window_overlap, sampling_rate, normalise, this.features,
 				this.defaults, save_features_for_each_window,
 				save_overall_recording_features, featureValue, featureKey,
-				outputType, cancel_, container);
-		System.out.println(names[0]);
-		processor.writeValuesARFFHeader(names);
+				outputType, cancel_, container, true,names);
+		}
+		else {
+			 processor = new FeatureProcessor(window_size,
+					window_overlap, sampling_rate, normalise, this.features,
+					this.defaults, save_features_for_each_window,
+					save_overall_recording_features, featureValue, featureKey,
+					outputType, cancel_, container,false,possibleValues);
+		}
+		
 		// Extract features from recordings one by one and save them in XML
 		// files
 //		AudioSamples recording_content;

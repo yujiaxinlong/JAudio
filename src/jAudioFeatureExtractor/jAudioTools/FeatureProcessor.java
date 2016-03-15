@@ -56,6 +56,8 @@ public class FeatureProcessor {
 
 	// Whether or not to normalise recordings before feature extraction.
 	private boolean normalise;
+	private boolean classify;
+	private String[] nominalFileNames;
 
 	// The features that are to be extracted.
 	private FeatureExtractor[] feature_extractors;
@@ -162,9 +164,13 @@ public class FeatureProcessor {
 			OutputStream feature_definitions_save_path, 
 			int outputType,
 			Cancel cancel,
-			AggregatorContainer container)
+			AggregatorContainer container,
+			boolean classify,
+			String[] names)
 			throws Exception {
 		this.cancel = cancel;
+		this.classify = classify;
+		this.nominalFileNames = names;
 		if(container!=null){
 			if((container.getNumberOfAggregators()==0)&&(save_overall_recording_features)){
 				throw new Exception(
@@ -255,7 +261,7 @@ public class FeatureProcessor {
 		if (outputType == 0) {
 			writeValuesXMLHeader();
 		} else if (outputType == 1) {
-			//writeValuesARFFHeader();
+			writeValuesARFFHeader();
 		}
 	}
 
@@ -853,10 +859,6 @@ public class FeatureProcessor {
 	 * @throws Exception
 	 */
 	private void writeValuesARFFHeader() throws Exception {
-		writeValuesARFFHeader(null);
-
-	}
-	public void writeValuesARFFHeader(String[] fileNames) throws Exception {
 		String sep = System.getProperty("line.separator");
 		String feature_value_header = "@relation jAudio" + sep;
 		values_writer.writeBytes(feature_value_header);
@@ -872,15 +874,16 @@ public class FeatureProcessor {
 					}
 				}
 			}
-			if(fileNames == null)
+			if(nominalFileNames == null)
 				values_writer.writeBytes("@ATTRIBUTE \"" + "FileName"
 					+ "\" STRING");
 			else
 				values_writer.writeBytes("@ATTRIBUTE \"" + "FileName"
-						+ "\" {" +String.join(",", fileNames)+"}");
+						+ "\" {" +String.join(",", nominalFileNames)+"}");
 			values_writer.writeBytes(sep);
 			values_writer.writeBytes("@DATA" + sep);
 		}
+
 	}
 
 
@@ -921,12 +924,14 @@ public class FeatureProcessor {
 			String identifier, AggregatorContainer aggContainer) throws Exception {
 		// We have to flatten the feature tree into a single set.
 		// Either output overall features or output all features
+		String[] separated = identifier.split("/");
+		String name =separated[separated.length-1];
 		if (save_overall_recording_features) {
 			if (!isARFFOverallHeaderWritten) {
-				aggContainer.outputARFFHeaderEntriesWithFileName(values_writer);
+				aggContainer.outputARFFHeaderEntriesWithFileName(values_writer,nominalFileNames);
 				isARFFOverallHeaderWritten = true;
 			}
-			aggContainer.outputARFFValueEntries(values_writer);
+			aggContainer.outputARFFValueEntries(values_writer,name,classify);
 		} else {
 			for (int win = 0; win < feature_values.length; ++win) {
 				for (int feat = 0; feat < feature_values[win].length; ++feat) {
@@ -957,8 +962,13 @@ public class FeatureProcessor {
 					}
 				}
 				values_writer.writeBytes(",");
-				String[] separated = identifier.split("/");
-				values_writer.writeBytes(separated[separated.length-1]);
+				if(classify == true){
+					
+					values_writer.writeBytes(name);
+				}
+				else{
+					values_writer.writeBytes(name.replaceAll("[0-9]",""));
+				}
 				values_writer.writeBytes(System.getProperty("line.separator"));
 			}
 		}
